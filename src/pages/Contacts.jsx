@@ -14,29 +14,30 @@ export default () => {
   const [form] = Form.useForm();
   const [showSuccess, setShowSuccess] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const onButtonSubmit = async () => {
     try {
-      const values = await form.validateFields();
-      console.log('Success:', values);
-      setShowWarning(false);
-      setTimeout(() => {
-        setShowSuccess(true);
-    }, 1000);
-    } catch (errorInfo) {
-      console.log('Failed:', errorInfo);
-      setShowSuccess(false);
-      setTimeout(() => {
+        const values = await form.validateFields();
+        setShowError(false);
+        setShowSuccess(false);
         setShowWarning(true);
-    }, 1000);
+        setTimeout(() => {
+            setShowSuccess(true);
+            setShowWarning(false);
+        }, 1000);
+    } catch (errorInfo) {
+        console.log('Failed:', errorInfo);
+        setShowSuccess(false);
+        setShowWarning(false);
+        setShowError(true);
     }
-
-    
   };
 
     return (<>
         <PageHeader
-            className="site-page-header"
+            id="header"
+            className="header"
             title="Contacts"
             subTitle="This is the contacts page"
         />
@@ -45,7 +46,7 @@ export default () => {
             layout="horizontal"
             form={form}
         >
-            <Form.Item {...formItemLayout}
+            <Form.Item className="usernameItem" {...formItemLayout}
                 name="username"
                 label="Name"
                 rules={[
@@ -57,13 +58,14 @@ export default () => {
                 ]}>
                 <Input />
             </Form.Item>
-            <Form.Item label="Job title">
+            <Form.Item name="jobTitle" label="Job title">
                 <Input />
             </Form.Item>
-            <Form.Item label="Phone number">
+            <Form.Item name="phone" label="Phone number">
                 <Input />
             </Form.Item>
-            <Form.Item 
+            <Form.Item
+                className="emailItem"
                 name="email"
                 label="Email"
                 rules={[
@@ -74,7 +76,19 @@ export default () => {
                 }]}>
                 <Input />
             </Form.Item>
-            <Form.Item {...buttonItemLayout}>
+            <Form.Item className="messageItem" {...formItemLayout}
+                name="message"
+                label="Message"
+                rules={[
+                {
+                    required: true,
+                    message: 'An empty message is not a good contact',
+                    type:"string"
+                },
+                ]}>
+                <Input />
+            </Form.Item>
+            <Form.Item name="submit" {...buttonItemLayout}>
                 <Button type="primary" onClick={onButtonSubmit}>Submit</Button>
             </Form.Item>
             {showSuccess && 
@@ -88,11 +102,19 @@ export default () => {
             }
             {showWarning && !showSuccess &&
                 <Alert
-                    message="Please fix the form errors before submitting"
+                    message="Sending message"
                     description="Thanks for reaching out. We'll get back to you as soon as we can."
                     type="warning"
                     closable
-                    onClose={()=>setShowWarning(false)}
+                    />
+            }
+            {showError && !showSuccess &&
+                <Alert
+                    message="Please fix the form errors before submitting"
+                    description="Thanks for reaching out. We'll get back to you as soon as we can."
+                    type="error"
+                    closable
+                    onClose={()=>setShowError(false)}
                     />
             }
         </Form>
